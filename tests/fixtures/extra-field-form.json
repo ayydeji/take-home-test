@@ -1,0 +1,18 @@
+{
+	"session_id": "sess_extra_01",
+	"application_reference": "GP-REG-2026-000043",
+	"name": "Morgan Casey Bell",
+	"email": "morgan.bell@example.com",
+	"gender": "female",
+	"date_of_birth": "1990-03-15",
+	"phone_number": "+44 20 7946 1001",
+	"mobile_number": "+44 7700 900456",
+	"legacy_notes": "migrated from the v0 intake spreadsheet",
+	"address": {
+		"address_line_1": "4 Museum Street",
+		"address_line_2": "Bloomsbury",
+		"address_line_3": "Camden",
+		"postcode": "WC1A 1JR",
+		"country": "United Kingdom"
+	}
+}

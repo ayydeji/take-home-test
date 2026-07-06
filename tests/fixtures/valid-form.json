@@ -1,0 +1,17 @@
+{
+	"session_id": "sess_9f2a7c",
+	"application_reference": "GP-REG-2026-000042",
+	"name": "Jordan Alexander Rivera",
+	"email": "jordan.rivera@example.com",
+	"gender": "other",
+	"date_of_birth": "1990-03-15",
+	"phone_number": "+44 20 7946 0958",
+	"mobile_number": "+44 7700 900123",
+	"address": {
+		"address_line_1": "12 Kingsway",
+		"address_line_2": "Holborn",
+		"address_line_3": "Camden",
+		"postcode": "WC2B 6NH",
+		"country": "United Kingdom"
+	}
+}
