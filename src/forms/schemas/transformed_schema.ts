@@ -1,4 +1,4 @@
-type TransformedFormSchema = {
+export type TransformedFormSchema = {
 	sessionId: string;
 	applicationReference: string;
 	firstName: string;
@@ -16,4 +16,3 @@ type TransformedFormSchema = {
 	longitude: number;
 	latitude: number;
 };
-

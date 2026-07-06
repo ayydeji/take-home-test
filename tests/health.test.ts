@@ -10,9 +10,10 @@ afterAll(async () => {
 	await db.pool.end();
 });
 
-describe("POST /ingest", () => {
-	it("should return 200", async () => {
-		const response = await request(app).post("/ingest");
+describe("GET /health", () => {
+	it("returns ok when the database is reachable", async () => {
+		const response = await request(app).get("/health");
 		expect(response.status).toBe(200);
+		expect(response.body).toEqual({ status: "ok" });
 	});
 });

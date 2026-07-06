@@ -1,28 +1,41 @@
 {
-  "name": "take-home-test",
-  "version": "1.0.0",
-  "description": "Take home test project",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn src/index.ts",
-    "test": "jest"
-  },
-  "keywords": [],
-  "license": "ISC",
-  "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/jest": "^29.0.0",
-    "@types/node": "^22.0.0",
-    "@types/supertest": "^6.0.0",
-    "jest": "^29.7.0",
-    "supertest": "^7.0.0",
-    "ts-jest": "^29.0.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "express": "^4.22.1"
-  }
+	"name": "take-home-test",
+	"version": "1.0.0",
+	"description": "Take home test project",
+	"main": "dist/index.js",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"build": "tsc",
+		"start": "node dist/index.js",
+		"dev": "ts-node-dev --respawn src/index.ts",
+		"test": "vitest run",
+		"lint": "eslint . && prettier --check .",
+		"typecheck": "tsc --noEmit",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate"
+	},
+	"keywords": [],
+	"license": "ISC",
+	"devDependencies": {
+		"@types/express": "^5.0.0",
+		"@types/node": "^22.0.0",
+		"@types/pg": "^8.11.0",
+		"@types/supertest": "^6.0.0",
+		"drizzle-kit": "^0.28.0",
+		"eslint": "^9.15.0",
+		"eslint-config-prettier": "^9.1.0",
+		"prettier": "^3.3.0",
+		"supertest": "^7.0.0",
+		"ts-node-dev": "^2.0.0",
+		"typescript": "^5.0.0",
+		"typescript-eslint": "^8.15.0",
+		"vitest": "^2.1.0"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.36.0",
+		"express": "^4.22.1",
+		"pg": "^8.13.0"
+	}
 }
