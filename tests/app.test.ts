@@ -1,13 +1,18 @@
-import { describe, it, expect, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import { buildApp } from "../src/app";
-import { createDb } from "../src/db/client";
+import { startTestDb, TestDb } from "./helpers/testDb";
 
-const db = createDb();
-const app = buildApp(db);
+let ctx: TestDb;
+let app: ReturnType<typeof buildApp>;
+
+beforeAll(async () => {
+	ctx = await startTestDb();
+	app = buildApp(ctx.db);
+});
 
 afterAll(async () => {
-	await db.pool.end();
+	await ctx.stop();
 });
 
 describe("POST /ingest", () => {

@@ -19,6 +19,7 @@
 	"keywords": [],
 	"license": "ISC",
 	"devDependencies": {
+		"@testcontainers/postgresql": "^10.28.0",
 		"@types/express": "^5.0.0",
 		"@types/node": "^22.0.0",
 		"@types/pg": "^8.11.0",
