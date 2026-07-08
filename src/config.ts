@@ -17,4 +17,12 @@ export const config = {
 		backoffBaseMs: Number(process.env.OUTBOX_BACKOFF_BASE_MS) || 1000,
 		backoffCapMs: Number(process.env.OUTBOX_BACKOFF_CAP_MS) || 300000,
 	},
+	apiKeys: {
+		provider: process.env.PROVIDER_API_KEY || "",
+		bot: process.env.BOT_API_KEY || "",
+		ops: process.env.OPS_API_KEY || "",
+	},
+	rateLimit: {
+		perMinute: Number(process.env.RATE_LIMIT_PER_MINUTE) || 300,
+	},
 };

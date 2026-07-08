@@ -1,12 +1,21 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, {
+	NextFunction,
+	Request,
+	RequestHandler,
+	Response,
+} from "express";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import { Db } from "./db/client";
 import { ingestForm } from "./ingest/ingestForm";
 import { getFormView } from "./forms/getFormView";
 import { claimReadyForms, parseClaimLimit } from "./forms/claimReadyForms";
 import { retryForm } from "./forms/retryForm";
 import { PipelineRunner } from "./pipeline/run";
+import { ApiKeyRing, Scope, requireScope } from "./auth";
+import { Logger, requestLogger } from "./log";
+import { config } from "./config";
 
 const formIdSchema = z.string().uuid();
 
@@ -19,9 +28,34 @@ function readNumericStatus(err: unknown): number | undefined {
 	return typeof status === "number" ? status : undefined;
 }
 
-export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
+export function buildApp(
+	db: Db,
+	deps: { runner?: PipelineRunner; apiKeys?: ApiKeyRing; logger?: Logger } = {},
+) {
 	const app = express();
 	const runner = deps.runner;
+
+	if (deps.logger) {
+		app.use(requestLogger(deps.logger));
+	}
+
+	const limiter = deps.apiKeys
+		? rateLimit({
+				windowMs: 60_000,
+				limit: config.rateLimit.perMinute,
+				standardHeaders: true,
+				legacyHeaders: false,
+				keyGenerator: (req) =>
+					req.header("x-api-key") ?? ipKeyGenerator(req.ip ?? "unknown"),
+			})
+		: undefined;
+
+	function protect(scope: Scope): RequestHandler[] {
+		if (!deps.apiKeys) {
+			return [];
+		}
+		return [limiter as RequestHandler, requireScope(deps.apiKeys, scope)];
+	}
 
 	app.use(express.json({ limit: "1mb" }));
 
@@ -36,6 +70,7 @@ export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
 
 	app.post(
 		"/ingest",
+		...protect("provider"),
 		async (req: Request, res: Response, next: NextFunction) => {
 			try {
 				const result = await ingestForm(db, req.body);
@@ -57,6 +92,7 @@ export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
 
 	app.post(
 		"/forms/ready",
+		...protect("bot"),
 		async (req: Request, res: Response, next: NextFunction) => {
 			try {
 				const limit = parseClaimLimit(req.query.limit);
@@ -70,6 +106,7 @@ export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
 
 	app.post(
 		"/forms/:id/retry",
+		...protect("ops"),
 		async (req: Request, res: Response, next: NextFunction) => {
 			try {
 				const parsed = formIdSchema.safeParse(req.params.id);
@@ -95,6 +132,7 @@ export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
 
 	app.get(
 		"/forms/:id",
+		...protect("ops"),
 		async (req: Request, res: Response, next: NextFunction) => {
 			try {
 				const parsed = formIdSchema.safeParse(req.params.id);

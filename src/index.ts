@@ -5,10 +5,15 @@ import { createDefaultRunner } from "./pipeline/run";
 import { createSweeper } from "./pipeline/sweeper";
 import { createOutboxWorker } from "./outbox/worker";
 import { ConsoleMail } from "./mail/provider";
+import { createLogger } from "./log";
 
 const db = createDb();
 const runner = createDefaultRunner(db);
-const app = buildApp(db, { runner });
+const app = buildApp(db, {
+	runner,
+	apiKeys: config.apiKeys,
+	logger: createLogger(),
+});
 const sweeper = createSweeper(db, { runner });
 sweeper.start();
 const outbox = createOutboxWorker(db, { mail: new ConsoleMail() });
