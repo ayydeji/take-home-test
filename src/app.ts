@@ -5,6 +5,7 @@ import { Db } from "./db/client";
 import { ingestForm } from "./ingest/ingestForm";
 import { getFormView } from "./forms/getFormView";
 import { claimReadyForms, parseClaimLimit } from "./forms/claimReadyForms";
+import { retryForm } from "./forms/retryForm";
 import { PipelineRunner } from "./pipeline/run";
 
 const formIdSchema = z.string().uuid();
@@ -61,6 +62,31 @@ export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
 				const limit = parseClaimLimit(req.query.limit);
 				const claimed = await claimReadyForms(db, limit);
 				return res.status(200).json(claimed);
+			} catch (err) {
+				next(err);
+			}
+		},
+	);
+
+	app.post(
+		"/forms/:id/retry",
+		async (req: Request, res: Response, next: NextFunction) => {
+			try {
+				const parsed = formIdSchema.safeParse(req.params.id);
+				if (!parsed.success) {
+					return res.status(400).json({ error: "invalid form id" });
+				}
+				const outcome = await retryForm(db, parsed.data);
+				if (outcome.outcome === "not_found") {
+					return res.status(404).json({ error: "form not found" });
+				}
+				if (outcome.outcome === "not_failed") {
+					return res.status(409).json({ status: outcome.status });
+				}
+				if (outcome.outcome === "retried" && runner) {
+					void runner(parsed.data).catch(() => {});
+				}
+				return res.status(202).json({ id: parsed.data });
 			} catch (err) {
 				next(err);
 			}
