@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Db } from "./db/client";
 import { ingestForm } from "./ingest/ingestForm";
 import { getFormView } from "./forms/getFormView";
+import { claimReadyForms, parseClaimLimit } from "./forms/claimReadyForms";
 import { PipelineRunner } from "./pipeline/run";
 
 const formIdSchema = z.string().uuid();
@@ -47,6 +48,19 @@ export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
 					void runner(result.id).catch(() => {});
 				}
 				return res.status(202).json({ id: result.id });
+			} catch (err) {
+				next(err);
+			}
+		},
+	);
+
+	app.post(
+		"/forms/ready",
+		async (req: Request, res: Response, next: NextFunction) => {
+			try {
+				const limit = parseClaimLimit(req.query.limit);
+				const claimed = await claimReadyForms(db, limit);
+				return res.status(200).json(claimed);
 			} catch (err) {
 				next(err);
 			}
