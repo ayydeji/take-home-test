@@ -1,7 +1,11 @@
 import express, { NextFunction, Request, Response } from "express";
 import { sql } from "drizzle-orm";
+import { z } from "zod";
 import { Db } from "./db/client";
 import { ingestForm } from "./ingest/ingestForm";
+import { getFormView } from "./forms/getFormView";
+
+const formIdSchema = z.string().uuid();
 
 function readNumericStatus(err: unknown): number | undefined {
 	if (typeof err !== "object" || err === null) {
@@ -38,6 +42,25 @@ export function buildApp(db: Db) {
 					return res.status(202).json({ id: result.id, conflict: true });
 				}
 				return res.status(202).json({ id: result.id });
+			} catch (err) {
+				next(err);
+			}
+		},
+	);
+
+	app.get(
+		"/forms/:id",
+		async (req: Request, res: Response, next: NextFunction) => {
+			try {
+				const parsed = formIdSchema.safeParse(req.params.id);
+				if (!parsed.success) {
+					return res.status(400).json({ error: "invalid form id" });
+				}
+				const view = await getFormView(db, parsed.data);
+				if (view === null) {
+					return res.status(404).json({ error: "form not found" });
+				}
+				return res.status(200).json(view);
 			} catch (err) {
 				next(err);
 			}
