@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Db } from "./db/client";
 import { ingestForm } from "./ingest/ingestForm";
 import { getFormView } from "./forms/getFormView";
+import { PipelineRunner } from "./pipeline/run";
 
 const formIdSchema = z.string().uuid();
 
@@ -16,8 +17,9 @@ function readNumericStatus(err: unknown): number | undefined {
 	return typeof status === "number" ? status : undefined;
 }
 
-export function buildApp(db: Db) {
+export function buildApp(db: Db, deps: { runner?: PipelineRunner } = {}) {
 	const app = express();
+	const runner = deps.runner;
 
 	app.use(express.json({ limit: "1mb" }));
 
@@ -40,6 +42,9 @@ export function buildApp(db: Db) {
 				}
 				if (result.outcome === "conflict") {
 					return res.status(202).json({ id: result.id, conflict: true });
+				}
+				if (runner) {
+					void runner(result.id).catch(() => {});
 				}
 				return res.status(202).json({ id: result.id });
 			} catch (err) {

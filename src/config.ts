@@ -8,4 +8,8 @@ export const config = {
 		attempts: Number(process.env.GEOCODER_ATTEMPTS) || 3,
 		backoffMs: Number(process.env.GEOCODER_BACKOFF_MS) || 100,
 	},
+	sweeper: {
+		intervalMs: Number(process.env.SWEEP_INTERVAL_MS) || 15000,
+		stalenessMs: Number(process.env.SWEEP_STALENESS_MS) || 60000,
+	},
 };
