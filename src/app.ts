@@ -12,6 +12,7 @@ import { ingestForm } from "./ingest/ingestForm";
 import { getFormView } from "./forms/getFormView";
 import { claimReadyForms, parseClaimLimit } from "./forms/claimReadyForms";
 import { retryForm } from "./forms/retryForm";
+import { getStats } from "./forms/getStats";
 import { PipelineRunner } from "./pipeline/run";
 import { ApiKeyRing, Scope, requireScope } from "./auth";
 import { Logger, requestLogger } from "./log";
@@ -144,6 +145,18 @@ export function buildApp(
 					return res.status(404).json({ error: "form not found" });
 				}
 				return res.status(200).json(view);
+			} catch (err) {
+				next(err);
+			}
+		},
+	);
+
+	app.get(
+		"/stats",
+		...protect("ops"),
+		async (_req: Request, res: Response, next: NextFunction) => {
+			try {
+				return res.status(200).json(await getStats(db));
 			} catch (err) {
 				next(err);
 			}
