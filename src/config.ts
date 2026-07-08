@@ -12,4 +12,9 @@ export const config = {
 		intervalMs: Number(process.env.SWEEP_INTERVAL_MS) || 15000,
 		stalenessMs: Number(process.env.SWEEP_STALENESS_MS) || 60000,
 	},
+	outbox: {
+		intervalMs: Number(process.env.OUTBOX_INTERVAL_MS) || 5000,
+		backoffBaseMs: Number(process.env.OUTBOX_BACKOFF_BASE_MS) || 1000,
+		backoffCapMs: Number(process.env.OUTBOX_BACKOFF_CAP_MS) || 300000,
+	},
 };
